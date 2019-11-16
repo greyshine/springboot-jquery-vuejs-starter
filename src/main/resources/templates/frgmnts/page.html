@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <body>
+	
+        <div id="heading">
+            <div class="row">
+                <!-- col-x -> where x sums up to 12 -->
+                <div class="col-10" >My Page</div>
+                <div class="col-2" style="text-align: right;">
+                    <button class="noMargins" @click="logout">Logout</button>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div id="mainMenu" class="floatLeft">
+            <div class="menuIcon"><img src="icons/menu.svg" style="width: 20px;"/></div>
+            <div class="menuHeading">HEADING-1</div>
+            <div class="menuItem">Item-1-1</div>
+            <div class="menuItem">Item-1-2</div>
+            <div class="menuHeading">HEADING-2</div>
+            <div class="menuItem">Item-2-1</div>
+            <div class="menuItem">Item2-22</div>
+            <div class="menuHeading">HEADING-3</div>
+            <div class="menuHeading">HEADING-4</div>
+            <div class="menuItem">Item-4-1</div>
+        </div>
+        
+        
+       
+        <div id="mainFloatLeftRightContainer" class="floatLeftRight">
+       
+            <div th:replace="~{:: div#mainMenu}"></div>
+            
+            <div class="floatRight">
+	           <!--  the div expands underneath the float:left; have the next div being a fully container -->
+	           <div th:replace="~{frgmnts/main :: div#main}"></div>
+            </div>
+	       
+	        <div class="clear"></div>
+	       
+        </div>
+
+        <div id="app">
+            <div th:replace="~{:: div#heading}"></div>
+            <div th:replace="~{:: div#mainFloatLeftRightContainer}"></div>
+        </div>
+	
+	</body>
+  
+</html>

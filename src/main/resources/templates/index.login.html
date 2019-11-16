@@ -1,0 +1,39 @@
+<!doctype html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		
+		<meta charset="utf-8">
+		
+		<title>Login</title>
+		
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
+		
+		<link rel="stylesheet" href="css/bootstrap-4.3.1.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link rel="stylesheet" href="css/styles.css">
+		
+		<script src="js/extern/jquery-3.3.1.min.js"></script>
+		<script src="js/extern/popper-1.14.7.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="js/extern/bootstrap-4.3.1.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+		<script src="js/extern/vue-2.6.0.js"></script>
+		<!-- https://github.com/axios/axios, https://vuejs.org/v2/cookbook/using-axios-to-consume-apis.html -->
+		<script src="js/extern/axios-0.19.0.min.js"></script>
+		<script src="js/script.js"></script>
+		<script src="js/vue.js"></script>
+		<script src="js/login.vue.js"></script>
+		
+		<!-- bootstrap -->
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		
+	</head>
+
+	<body>
+	
+		<div id="vue-login">
+            <div th:replace="~{frgmnts/login :: div#formLogin}"></div>
+		</div>
+		
+	</body>
+</html>
