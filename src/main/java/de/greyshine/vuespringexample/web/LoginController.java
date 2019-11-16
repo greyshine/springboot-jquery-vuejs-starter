@@ -30,7 +30,8 @@ public class LoginController {
 	@PostMapping( value="/login")
 	public Status login(@RequestParam(value="login") String login, @RequestParam(value="password") String password, HttpServletRequest req, HttpServletResponse res) {
 		
-		login = login == null ? null : login.strip();
+		//login = login == null ? null : login.strip();
+		login = login == null || login.trim().isEmpty() ? null : login.trim();
 		
 		final boolean isLogin = loginService.login( login, password );
 		
@@ -69,7 +70,8 @@ public class LoginController {
 	private HttpSession initNewHttpSession(String login, HttpServletRequest req) {
 		
 		if ( req == null ) { return null; }
-		if ( login == null || login.strip().isBlank() ) { return null; }
+		//if ( login == null || login.strip().isBlank() ) { return null; }
+		if ( login == null || login.trim().isEmpty() ) { return null; }
 		
 		final HttpSession httpSession = req.getSession( true );
 		LOG.info( "initNewHttpSession [login="+ login +", session="+ httpSession.getId() +"]" );
@@ -98,7 +100,8 @@ public class LoginController {
 		
 		if ( httpSession != null && httpSession.getAttribute("login") != null ) {
 			login = ((String)httpSession.getAttribute("login"));
-			login = login == null || login.strip().isBlank() ? null : login.strip();
+			//login = login == null || login.strip().isBlank() ? null : login.strip();
+			login = login == null || login.trim().isEmpty() ? null : login.trim();
 		}
 		
 		return login;
