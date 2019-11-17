@@ -4,32 +4,81 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import de.greyshine.vuespringexample.db.entity.User;
 import de.greyshine.vuespringexample.db.repos.UserRepository;
+import de.greyshine.vuespringexample.utils.Utils;
 
 @Service
 public class LoginService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger( LoginService.class );
+
+	public static final Logger LOG_USERLOGIN = LoggerFactory.getLogger( "UserLogin" );
+	
+	public static final String DEFAULT_ADMIN_LOGIN = "admin";
+	/**
+	 * Change that after first start of app!
+	 */
+	public static final String DEFAULT_ADMIN_PWD = "adminpwd";
+	
+	/**
+	 * TODO: move to configurable place
+	 */
+	public static final int MAX_BAD_PWDS_LOGINS = 6;
 	
 	@Autowired
 	private UserRepository userRepository;
-
-	public boolean login(String login, String password) {
+	
+	/**
+	 * Ensures that an user with login "admin" exists; if created the user is disabled by default.
+	 */
+	public void ensureAdminUser() {
 		
-		if ( "admin".equals( login ) ) { return true; }
+		User user = userRepository.findByLogin( DEFAULT_ADMIN_LOGIN );
 		
-		return false;
+		if ( user != null ) { return; }
+		
+		// TODO get email from application.properties or similar configuration
+		create(DEFAULT_ADMIN_LOGIN, LoginService.DEFAULT_ADMIN_PWD, "test@greyshine.de", false);
+	}
+	
+	@Transactional
+	public LoginState login(String login, String password) {
+		
+		if ( Utils.isBlank( login ) || Utils.isBlank( password ) ) { return LoginState.BAD_REQUEST; }
+		
+		final User user = userRepository.findByLogin( login );
+		
+		if ( user == null ) { 
+			return LoginState.UNKNWON_USER;
+		}
+		
+		if ( !user.isActive() ) {
+			return LoginState.INACTIVE;
+		}
+		
+		
+		if ( user.getFailedLogins() >= MAX_BAD_PWDS_LOGINS ) {
+			return LoginState.BAD_PASSWORD_COUNT;
+		}
+		
+		
+		if ( !user.getPassword().equals( passwordSha512(  password ) ) ) {
+			user.increaseBadPasswordCount();
+			return LoginState.BAD_PASSWORD;
+		}
+		
+		user.resetBadPasswordCount();
+		
+		return LoginState.OK;
 	}
 	
 	public void create(String login, String password, String email, boolean active) {
@@ -49,7 +98,7 @@ public class LoginService {
 		LOG.debug("created: {}", user);
 	}
 
-	private String passwordSha512(String password) {
+	public String passwordSha512(String password) {
 		
 		if ( password == null || password.strip().isBlank() ) { return null; }
 		
@@ -65,8 +114,13 @@ public class LoginService {
 		}
 	}
 	
+	public enum LoginState {
+		OK,
+		UNKNWON_USER,
+		INACTIVE,
+		BAD_PASSWORD,
+		BAD_PASSWORD_COUNT,
+		BAD_REQUEST;
+	}
 	
-	
-	
-
 }

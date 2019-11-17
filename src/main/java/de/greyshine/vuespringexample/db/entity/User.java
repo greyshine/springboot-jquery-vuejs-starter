@@ -13,84 +13,94 @@ import javax.validation.constraints.Pattern;
 
 import com.sun.istack.NotNull;
 
+import de.greyshine.vuespringexample.utils.Utils;
+
 @Entity
 //quotations are important due to naming conflict w/ reserved postgres' user term.
-@Table( name = "\"user\"" ) 
+@Table(name = "\"user\"")
 public class User {
 
 	@Id
 	private String login;
-	
+
 	@Version
-    private int version;
-	
+	private int version;
+
 	private LocalDateTime created;
 	@SuppressWarnings("unused")
 	private LocalDateTime updated;
-	
+
 	private boolean active = false;
-	
+
 	@NotNull
 	private String password;
-	
+
 	private int failedLogins = 0;
-	
+
 	@NotBlank
 	// regex taken from: https://emailregex.com/
-	@Pattern( regexp = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])" )
+	@Pattern(regexp = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")
 	private String email;
-	
+
 	public String getLogin() {
 		return login;
 	}
-	
+
 	public void setLogin(String login) {
 		this.login = login;
 	}
-	
+
 	public boolean isActive() {
 		return active;
 	}
-	
+
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	
+
 	public String getPassword() {
 		return password;
 	}
-	
+
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
 	public String getEmail() {
 		return email;
 	}
-	
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+
 	public int getFailedLogins() {
 		return failedLogins;
 	}
-	
+
 	public void setFailedLogins(int failedLogins) {
 		this.failedLogins = failedLogins;
 	}
-	
+
 	@PrePersist
 	public void prePersist() {
 		created = LocalDateTime.now();
-		updated = created; 
+		updated = created;
 	}
-	
+
 	@PreUpdate
 	public void preUpdate() {
-		updated = LocalDateTime.now(); 
+		updated = LocalDateTime.now();
 	}
 	
+	public void increaseBadPasswordCount() {
+		failedLogins++;
+	}
+	
+	public void resetBadPasswordCount() {
+		failedLogins = 0;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -118,6 +128,6 @@ public class User {
 
 	@Override
 	public String toString() {
-		return User.class.getTypeName() + " [login="+ login +"]";
+		return User.class.getSimpleName() + " [login=" + login + ", created="+ Utils.toString( created ) +"]";
 	}
 }

@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import de.greyshine.vuespringexample.db.entity.User;
 import de.greyshine.vuespringexample.db.repos.UserRepository;
 import de.greyshine.vuespringexample.services.LoginService;
 
@@ -30,6 +29,8 @@ public class TestDummyIT {
 		
 		loginService.create( "Login1", "password", "test@somewhere.de", true);
 		userRepository.findAll().forEach( u -> LOG.info("{}", u) );
+		
+		showUsers();
 	}
 	
 	@Test

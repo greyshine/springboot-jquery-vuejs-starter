@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.greyshine.vuespringexample.services.LoginService;
+import de.greyshine.vuespringexample.services.LoginService.LoginState;
+import de.greyshine.vuespringexample.utils.Utils;
 
 @RestController
 @RequestMapping("/ajax")
@@ -33,13 +35,11 @@ public class LoginController {
 		login = login == null ? null : login.strip();
 		//login = login == null || login.trim().isEmpty() ? null : login.trim();
 		
-		final boolean isLogin = loginService.login( login, password );
+		final LoginState loginState = loginService.login( login, password );
 		
-		if ( isLogin ) {
+		if ( LoginState.OK != loginState ) {
 		
-			initNewHttpSession( login, req );
-		
-		} else {
+			LoginService.LOG_USERLOGIN.error( "Login failure User [user={}, ip={}]", login, Utils.getIp( req ) );
 			
 			// https://stackoverflow.com/a/6937030/845117
 			res.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
@@ -47,9 +47,13 @@ public class LoginController {
 			// I do not know what and how to set the value, what is a realm what is basic how to cope with www form logins...; may someone explain to a foreigner, please: kuemmel.dss@gmx.de
 			//res.setHeader( "WWW-Authenticate" , "Basic realm=\"myRealm\"");
 			res.setHeader( "WWW-Authenticate" , "?");
+			
+		} else {
+			
+			initNewHttpSession( login, req );
 		}
 		
-		return new Status( isLogin ? login : null ) ;
+		return new Status( LoginState.OK == loginState ? login : null ) ;
 	}
 	
 	@GetMapping( value="logout")

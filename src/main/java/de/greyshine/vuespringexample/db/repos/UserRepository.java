@@ -4,8 +4,10 @@ import org.springframework.data.repository.CrudRepository;
 
 import de.greyshine.vuespringexample.db.entity.User;
 
-public interface UserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends CrudRepository<User, String> {
 
 	User findByLogin(String login);
+	
+	
 	
 }
