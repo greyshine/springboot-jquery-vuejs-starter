@@ -28,6 +28,11 @@ public final class Utils {
 		return null;
 	}
 	
+	/**
+	 * Null safe blank check
+	 * @param value
+	 * @return
+	 */
 	public static boolean isBlank(String value) {
 		return value == null || value.trim().isBlank();
 	}
@@ -35,8 +40,19 @@ public final class Utils {
 	public static boolean isNotBlank(String value) {
 		return !isBlank(value);
 	}
+	
+	/**
+	 * Null safe String strip.
+	 * @param value
+	 * @return
+	 */
+	public static String strip(String value) {
+		return value == null ? null : value.strip();
+	}
 
 	/**
+	 * Fetch IP Address from a {@link HttpServletRequest}.
+	 * 
 	 * Taken from: https://stackoverflow.com/a/21529994/845117
 	 * @param request
 	 * @return
@@ -82,6 +98,4 @@ public final class Utils {
 	
 	    return ip;  
 	}
-
-	
 }

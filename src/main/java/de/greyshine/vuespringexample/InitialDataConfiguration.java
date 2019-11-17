@@ -24,9 +24,7 @@ public class InitialDataConfiguration {
 		
 		loginService.ensureAdminUser();
 		
-		System.out.println("Started after Spring boot application !");
+		LOG.debug("Started after Spring boot application !");
     }
-
-	
 
 }

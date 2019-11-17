@@ -32,14 +32,11 @@ public class LoginController {
 	@PostMapping( value="/login")
 	public Status login(@RequestParam(value="login") String login, @RequestParam(value="password") String password, HttpServletRequest req, HttpServletResponse res) {
 		
-		login = login == null ? null : login.strip();
-		//login = login == null || login.trim().isEmpty() ? null : login.trim();
-		
 		final LoginState loginState = loginService.login( login, password );
 		
 		if ( LoginState.OK != loginState ) {
 		
-			LoginService.LOG_USERLOGIN.error( "Login failure User [user={}, ip={}]", login, Utils.getIp( req ) );
+			LoginService.LOG_USERLOGIN.error( "Login failure [user={}, loginState={}, ip={}]", login, loginState.name(), Utils.getIp( req ) );
 			
 			// https://stackoverflow.com/a/6937030/845117
 			res.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
@@ -75,7 +72,6 @@ public class LoginController {
 		
 		if ( req == null ) { return null; }
 		if ( login == null || login.strip().isBlank() ) { return null; }
-		//if ( login == null || login.trim().isEmpty() ) { return null; }
 		
 		final HttpSession httpSession = req.getSession( true );
 		LOG.info( "initNewHttpSession [login="+ login +", session="+ httpSession.getId() +"]" );
@@ -104,8 +100,7 @@ public class LoginController {
 		
 		if ( httpSession != null && httpSession.getAttribute("login") != null ) {
 			login = ((String)httpSession.getAttribute("login"));
-			login = login == null || login.strip().isBlank() ? null : login.strip();
-			//login = login == null || login.trim().isEmpty() ? null : login.trim();
+			login = Utils.strip( login );
 		}
 		
 		return login;
