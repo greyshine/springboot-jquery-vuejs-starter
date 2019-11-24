@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import de.greyshine.vuespringexample.db.repos.UserRepository;
-import de.greyshine.vuespringexample.services.LoginService;
+import de.greyshine.vuespringexample.services.UserService;
 
 @RunWith( SpringRunner.class )
 @SpringBootTest( webEnvironment = WebEnvironment.NONE )
@@ -22,12 +22,12 @@ public class TestDummyIT {
 	private UserRepository userRepository;
 	
 	@Autowired
-	private LoginService loginService;
+	private UserService userService;
 	
 	@Test
 	public void createUser() {
 		
-		loginService.create( "Login1", "password", "test@somewhere.de", true);
+		userService.create( "Login1", "password", "test@somewhere.de", null, true);
 		userRepository.findAll().forEach( u -> LOG.info("{}", u) );
 		
 		showUsers();

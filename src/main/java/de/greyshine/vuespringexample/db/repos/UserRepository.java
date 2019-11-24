@@ -8,4 +8,6 @@ public interface UserRepository extends CrudRepository<User, String> {
 
 	User findByLogin(String login);
 	
+	User findBySessionToken(String sessionToken);
+	
 }
