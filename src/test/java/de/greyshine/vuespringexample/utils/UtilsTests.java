@@ -8,7 +8,7 @@ public class UtilsTests {
 	@Test
 	public void testBlank() {
 		
-		Assert.assertTrue( Utils.isBlank( null ) );
+		Assert.assertTrue( Utils.isBlank( (String)null ) );
 		Assert.assertTrue( Utils.isBlank( "" ) );
 		Assert.assertTrue( Utils.isBlank( " " ) );
 		

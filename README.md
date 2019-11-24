@@ -17,3 +17,30 @@ Using the following aspects
   
   
 Note that under Eclipse debug mode it did not seem that updating thymeleaf web artefacts is taken into account of updating.  
+
+
+## TODOs:
+
+- Ask stackoverflow:
+  
+  res.setHeader( "WWW-Authenticate" , "Basic realm=\"localhost\"");`
+  
+  What is a realm? what value to put?  
+  I am german, I can translate but won't understand.  
+  What value to put as realm?  
+  
+-   Next question
+  
+  
+
+
+## Login process
+
+### Web
+
+todo
+
+### Rest Service
+
+todo
+
