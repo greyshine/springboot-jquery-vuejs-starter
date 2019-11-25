@@ -2,12 +2,12 @@ package de.greyshine.vuespringexample;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@EnableWebMvc
+//WARN: enabling @EnableWebMvc
+// if enabled then web resources are not served from /resources/public/*
 public class WebConfig implements WebMvcConfigurer {
 	
 	/**
@@ -22,7 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
 	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-	    
 		registry.addInterceptor( accessInterceptor() );
 	}
 
