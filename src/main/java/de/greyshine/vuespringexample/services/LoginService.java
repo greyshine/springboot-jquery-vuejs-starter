@@ -16,7 +16,6 @@ import de.greyshine.vuespringexample.utils.Utils;
 public class LoginService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LoginService.class);
-
 	public static final Logger LOG_USERLOGIN = LoggerFactory.getLogger("UserLogin");
 
 	private static volatile long sessionIds = 0;

@@ -28,7 +28,6 @@ import de.greyshine.vuespringexample.services.UserService;
 import de.greyshine.vuespringexample.utils.Utils;
 
 @RestController
-//@RequestMapping
 public class LoginController {
 	
 	private static final Logger LOG 	= LoggerFactory.getLogger( LoginController.class );
@@ -73,7 +72,9 @@ public class LoginController {
 			// I do not know what and how to set the value, what is a realm what is basic how to cope with www form logins...; may someone explain to a foreigner, please: kuemmel.dss@gmx.de
 			//res.setHeader( "WWW-Authenticate" , "Basic realm=\"myRealm\"");
 			// probably see: https://blog.restcase.com/restful-api-authentication-basics/
-			res.setHeader("WWW-Authenticate", "Basic realm=\"WTF_is_a_realm-questionMark\"");
+			// sending this  
+			//res.setHeader("WWW-Authenticate", "Basic realm=\"WTF_is_a_realm-questionMark\"");
+			// will have the browser to open a browser-native login screen.
 			return new Status( null ) ;
 			
 		} else {
@@ -141,7 +142,7 @@ public class LoginController {
 			
 			LOG.info( "token for user rights: {}", req.getHeader( HEADER_AUTHORISATION ) );
 			
-			final String token = Utils.executeSafe( ()->{
+			final String token = Utils.executeSafe( () -> {
 
 				final String t = (String)req.getHeader( HEADER_AUTHORISATION );
 				return t.substring( t.strip().indexOf( ' ' ) ).trim();

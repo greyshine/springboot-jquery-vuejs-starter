@@ -23,8 +23,7 @@ _initFunctions.push( function() {
 				axios('/ajax/login', {
 					  method: 'post',
 					  data: formData,
-					  // config: { headers: {'Content-Type':
-						// 'multipart/form-data' }}
+					  //config: { headers: {'Content-Type':'multipart/form-data' } }
 				      })
 			  	.then( response => { 
 			  		
@@ -48,9 +47,9 @@ _initFunctions.push( function() {
 			  		
 			  	} )
 			  	.catch(error => {
+			  		
 			  		console.error(error);
 			  		this.msgErrorLogin = 'Fatal error: '+error;
-			  		
 			  	})
 			  	.finally( () => {} );
 			} 
