@@ -42,8 +42,8 @@ public class LoginController {
 			res.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
 			
 			// I do not know what and how to set the value, what is a realm what is basic how to cope with www form logins...; may someone explain to a foreigner, please: kuemmel.dss@gmx.de
+			// when enabled, browser will show native login screen.
 			//res.setHeader( "WWW-Authenticate" , "Basic realm=\"myRealm\"");
-			res.setHeader( "WWW-Authenticate" , "?");
 			
 		} else {
 			
