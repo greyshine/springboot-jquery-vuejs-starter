@@ -4,13 +4,34 @@
 	<body>
   
 	  	<div id="formLogin">
-        
-            <form method="post" v-on:submit="submitLogin"> <!-- @submit:prevent="submitLogin" seems not to properly work w/ post form submits -->
+	  	
+	  	    <form id="formLogin" method="post" v-on:submit="submitLogin" v-if="showLoginForm"> <!-- @submit:prevent="submitLogin" seems not to properly work w/ post form submits -->
+               
                <div class="formMessageError">{{msgErrorLogin}}</div>
-               <div><input type="text" name="login" placeholder="login" /></div>
-               <div><input type="password" name="password" placeholder="password" /></div>
-               <div><button type="submit">Login</button></div>
+               <div class="formPasswordReset">{{msgPasswordReset}}</div>
+               <div><input type="text" name="login" placeholder="login" v-on:focus="focusLoginOrPassword"/></div>
+               <div><input type="password" name="password" placeholder="password" v-on:focus="focusLoginOrPassword"/></div>
+               
+               <div>
+                   <button type="submit">Login</button>
+                   <a href="#" v-on:click="clickForgotPassword">forgot password</a>
+               </div>
+               
             </form>
+            
+            <div id="passwordReset" v-if="showPasswordReset">
+            
+                <h3>Password reset</h3>
+                
+                <form method="post" v-on:submit="submitPasswordreset">
+	                <div><input type="text" name="email" placeholder="email" /></div>
+	                <div>
+                        <button type="submit">Send</button>
+                        <a href="#" v-on:click="clickCancelForgotPassword">cancel</a>
+                    </div>
+	            </form>
+	            
+	        </div>
             
         </div>
   

@@ -1,0 +1,14 @@
+Subjectline - {{time}}
+
+This is a test email.
+
+This image <img src="cid:image1.jpg"/> and this <img src="cid:image2.jpg"/> should be inline.
+These also: <img src="cid:image3.jpg"/> <img src="cid:image4.jpg"/>
+
+This is <b>bold</b> and <i>italique</i>.
+
+Last line on the html area.
+
+-
+
+This is a simple text part on the plaintext area.

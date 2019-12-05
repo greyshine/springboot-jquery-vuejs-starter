@@ -6,7 +6,10 @@ _initFunctions.push( function() {
 		el: '#vue-login',
 		
 		data: {
-			msgErrorLogin: ''
+			msgErrorLogin: '',
+			msgPasswordReset: '',
+			showLoginForm: true,
+			showPasswordReset: false
 		},
 		
 		methods: {
@@ -52,7 +55,63 @@ _initFunctions.push( function() {
 			  		this.msgErrorLogin = 'Fatal error: '+error;
 			  	})
 			  	.finally( () => {} );
-			} 
+			},
+			
+			clickForgotPassword(event) {
+				this.showLoginForm = false;
+				this.showPasswordReset = true;
+			},
+			
+			clickCancelForgotPassword(event) {
+				this.msgPasswordReset = '';
+				this.showPasswordReset = false;
+				this.showLoginForm = true;
+			},
+			
+			focusLoginOrPassword(event) {
+				console.debug(event);
+				this.msgPasswordReset = '';
+			},
+			
+			submitPasswordreset(event) {
+				
+				console.log( 'event', event );
+				event.preventDefault();
+				
+				var email = event.target.elements.email.value;
+				
+				// do nothing on submitting blank value
+				if ( email == null || email.trim().length == 0 ) { return; }
+				
+				var formData = new FormData();
+				formData.set('email', email);
+				
+				axios('/ajax/passwordreset', {
+					  method: 'post',
+					  data: formData,
+				      })
+			  	.then( response => { 
+			  		
+			  		console.log('response', response);
+			  		this.msgPasswordReset = 'Request is submitted to '+ email +'. Check your email!'
+			  		
+			  	}, error => {
+			  		
+			  		this.msgErrorLogin = error;
+			  		
+			  	} )
+			  	.catch(error => {
+			  		
+			  		console.error(error);
+			  		this.msgErrorLogin = 'Fatal error: '+error;
+			  	})
+			  	.finally( () => {
+			  		
+			  		this.showPasswordReset = false;
+					this.showLoginForm = true;
+			  	} );
+				
+			},
 		}
 		
 	});

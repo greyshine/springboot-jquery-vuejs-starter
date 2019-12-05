@@ -1,22 +1,45 @@
 package de.greyshine.vuespringexample.utils;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Collection of static utility methods.
  */
 public final class Utils {
 	
-	private Utils() {}
+	private static final Logger LOG = LoggerFactory.getLogger( Utils.class );
+	
+	public static final Charset CHARSET_UTF8 = Charset.forName( "UTF-8" );
+
+	public static final String LOCALDATE_FORMAT = "yyyy-MM-dd";
+	public static final String LOCALDATETIME_FORMAT = LOCALDATE_FORMAT+"'T'HH:mm:ss.SSS";
+
+	private Utils() {
+	}
 
 	public static String toString(Object object) {
 		
-		if ( object instanceof LocalDate ) {
+		if ( object == null ) {
+			return "null";
+		}
+		
+		else if ( object instanceof LocalDate ) {
 			final LocalDate ld = (LocalDate) object;
 			return ld.format( DateTimeFormatter.ISO_DATE );
 		}
@@ -26,7 +49,12 @@ public final class Utils {
 			return ldt.format( DateTimeFormatter.ISO_DATE_TIME );
 		}
 		
-		return null;
+		else if ( object instanceof Throwable ) {
+			final Throwable t = (Throwable) object;
+			return t.getClass().getTypeName()+" [message="+ t.getMessage() +", cause="+ toString(t.getCause()) +"]";
+		}
+		
+		return String.valueOf( object );
 	}
 	
 	/**
@@ -47,7 +75,7 @@ public final class Utils {
 	 * @param values
 	 * @return
 	 */
-	public static boolean isBlank(String[] values) {
+	public static boolean isAllBlank(String... values) {
 		
 		if ( values == null || values.length == 0 ) { return true; }
 		
@@ -67,16 +95,21 @@ public final class Utils {
 		return value == null ? null : value.strip();
 	}
 	
-	public static String trim(String string) {
-		return string == null ? null : string.trim();
+	public static String trim(String value) {
+		return value == null ? null : value.trim();
 	}
 	
 	public static String trimToNull(String value) {
-		return value == null || isBlank(value) ? null : value.trim();
+		return isBlank(value) ? null : value.trim();
+	}
+	
+	public static String trimToNull(String value, Function<String,String> modifierFunctionOnNotNull) {
+		if ( isBlank(value) ) { return null; }
+		return modifierFunctionOnNotNull == null ? value.trim() : modifierFunctionOnNotNull.apply( value );
 	}
 	
 	public static String trimToEmpty(String value) {
-		return value == null || isBlank(value) ? "" : value.trim();
+		return isBlank(value) ? "" : value.trim();
 	}
 
 	/**
@@ -195,6 +228,92 @@ public final class Utils {
 	public interface Function2<S,T> {
 		T apply( S argument ) throws Exception;
 	}
+
+	public static String formatDate(String format, LocalDateTime localDateTime) {
+		if ( format == null || localDateTime == null ) { return null; }
+		return DateTimeFormatter.ofPattern( format ).format( localDateTime );
+	}
+
+	public static boolean equals(String s1, String s2, boolean ignoreCasing) {
+		if ( s1 == null || s2 == null ) { return false; }
+		if ( s1 == s2 ) { return true; }
+		return !ignoreCasing ? s1.equals( s2 ) : s1.equalsIgnoreCase(s2);
+	}
 	
+	public static boolean equals(Long l1, Long l2) {
+		if ( l1 == null || l2 == null ) { return false; }
+		return l1 == l2;
+	}
+
+	public static String getResource(String name, Charset charset) throws IOException {
+		
+		charset = charset != null ? charset : CHARSET_UTF8;
+		
+		final InputStream is =  ClassLoader.getSystemClassLoader().getResourceAsStream( name );
+		
+		if ( is == null ) { return null; }
+		
+		final StringBuilder sb = new StringBuilder();
+		
+		try (final Reader reader = new InputStreamReader( is , charset )) {
+			int c = -1;
+			while( (c = reader.read()) != -1 ) {
+				sb.append( (char)c );
+			}
+	    }
+		
+		return sb.toString();
+	}
+
+	public static void threadWait(long millis) {
+		
+		final long waitUntil = System.currentTimeMillis() + millis;
+		
+		if ( LOG.isDebugEnabled() ) {
+			LOG.debug( "wait until "+ new Date(waitUntil) );	
+		}
+		
+		while( System.currentTimeMillis() < waitUntil ) {
+			
+			final long waitTime = waitUntil - System.currentTimeMillis();
+			
+			if ( waitTime < 1 ) { continue; }
+			
+			synchronized ( Thread.currentThread() ) {
+				try {
+					Thread.currentThread().wait( waitTime );
+				} catch (InterruptedException e) {
+					LOG.warn("error waiting", e);
+				}				
+			}
+		}
+	}
+	
+	public static void close(Closeable... closeables) {
+		if ( closeables == null ) { return; }
+		for(Closeable c : closeables) {
+			try {
+				c.close();
+			} catch (Exception e) {
+				// intended ignore
+			}
+		}
+	}
+
+	public static String trimOrDefaultIfBlank(String value, Supplier<String> supplier ) {
+		if ( isNotBlank(value) ) { return value.strip(); }
+		return supplier == null ? null : supplier.get(); 
+	}
+
+	public static <T,S extends Closeable> T executeAndClose(S closable, Function2<S,T> function) throws Exception {
+		
+		try {
+		
+			return function == null ? null : function.apply( closable );
+			
+		} finally {
+			close( closable );
+		}
+	}
 	
 }

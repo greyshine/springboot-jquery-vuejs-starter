@@ -2,6 +2,10 @@ package de.greyshine.vuespringexample.services;
 
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +23,14 @@ public class LoginService {
 	public static final Logger LOG_USERLOGIN = LoggerFactory.getLogger("UserLogin");
 
 	private static volatile long sessionIds = 0;
-	
 
 	/**
 	 * TODO: move to configurable place
 	 */
 	public static final int MAX_BAD_PWDS_LOGINS = 6;
+
+	@PersistenceContext
+	private EntityManager em;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -50,7 +56,7 @@ public class LoginService {
 			return LoginState.BAD_PASSWORD_COUNT;
 		}
 
-		if (!user.getPassword().equals( UserService.getPasswordCrypted(password)) ) {
+		if (!user.getPassword().equals(UserService.getPasswordCrypted(password))) {
 			user.increaseBadPasswordCount();
 			return LoginState.BAD_PASSWORD;
 		}
@@ -59,30 +65,31 @@ public class LoginService {
 
 		return LoginState.OK;
 	}
-	
+
 	@Transactional
 	public String getSessionToken(String login, boolean buildWhenNull) {
-		
-		User user = userRepository.findByLogin( login );
-		
-		if ( user == null ) { 
-			LOG.info( "no user found [login={}]", login );
+
+		User user = userRepository.findByLogin(login);
+
+		if (user == null) {
+			LOG.info("no user found [login={}]", login);
 			return null;
 		}
 
 		String sessionToken = user.getSessionToken();
-		
-		if ( sessionToken == null ) {
-			
+
+		if (sessionToken == null) {
+
 			sessionToken = createSessionId();
-			user.setSessionToken( sessionToken );
+			user.setSessionToken(sessionToken);
 		}
-		
+
 		return sessionToken;
 	}
 
 	public String createSessionId() {
-		return new StringBuilder().append( UUID.randomUUID().toString() ).append( '.' ).append( sessionIds++ ).append( '.' ).append( System.currentTimeMillis() ).toString();
+		return new StringBuilder().append(UUID.randomUUID().toString()).append('.').append(sessionIds++).append('.')
+				.append(System.currentTimeMillis()).toString();
 	}
 
 	public enum LoginState {
@@ -91,10 +98,38 @@ public class LoginService {
 
 	@Transactional
 	public String getLoginByToken(String token) {
-		
-		if ( Utils.isBlank( token ) ) { return null; }
-		
-		final User user = userRepository.findBySessionToken( token );
+
+		if (Utils.isBlank(token)) {
+			return null;
+		}
+
+		final User user = userRepository.findBySessionToken(token);
 		return user == null ? null : user.getLogin();
+	}
+
+	@Transactional
+	public boolean requestPasswordRenewal(String email) {
+
+		if (Utils.isBlank(email)) {
+			return false;
+		}
+
+		String password = Long.toString(System.currentTimeMillis(), 30).toLowerCase();
+		password = UserService.getPasswordCrypted(password);
+
+		final Query q = em.createQuery(
+				"UPDATE User u " + 
+				"SET u.password = :password " + 
+				"WHERE u.email = :email " +
+				"AND u.login != :adminLogin "
+		);
+
+		q.setParameter("adminLogin", "admin");
+		q.setParameter("email", Utils.strip(email));
+		q.setParameter("password", password);
+
+		final int resultCount = q.executeUpdate();
+		
+		return resultCount > 0;
 	}
 }

@@ -31,8 +31,6 @@ public class UsersWebIT {
 	@Autowired
 	private UserService userService;
 
-	final UserInfo userInfo = UserInfo.ADMIN;
-
 	@Test
 	public void testListUsers_ADMIN() throws Exception {
 		

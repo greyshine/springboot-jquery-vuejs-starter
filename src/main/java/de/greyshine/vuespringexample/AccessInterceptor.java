@@ -51,7 +51,7 @@ public class AccessInterceptor extends HandlerInterceptorAdapter {
 		
 		// no specific right demanded by annotation
 		// and we do have a logged in user
-		if ( Utils.isBlank( access.value() ) ) {
+		if ( Utils.isAllBlank( access.value() ) ) {
 			return true;
 		}
 		

@@ -15,7 +15,9 @@ public abstract class UserInfo {
 
 	private static final Logger LOG = LoggerFactory.getLogger( UserInfo.class );
 	
-	public String login, password;
+	public static final String EMAIL_DOMAIN = "test-check.com";
+	
+	public String login, password, email;
 	public Boolean activeState = true;
 	public String sessionToken = null;
 	public String[] rights;
@@ -26,21 +28,26 @@ public abstract class UserInfo {
 		userService.setActiveState( login , activeState );
 	}
 	
+	public UserInfo ensureDbExistance(UserService userService) {
+		
+		if ( !userService.isLogin( login ) ) {
+			userService.create(login, password, email, new String[] { "right1" }, false);
+		}
+		
+		if ( this.activeState != null ) {
+			userService.setActiveState(login, activeState);
+		}
+		
+		return this;
+	}
+	
 	/**
 	 * @param mockMvc
 	 * @return session token
 	 */
 	public String loginRest(MockMvc mockMvc, UserService userService) {
 		
-		
-		if ( !userService.isLogin( login ) ) {
-			userService.create(login, password, "test@test.com", new String[] { "right1" }, false);
-		}
-		
-		
-		if ( this.activeState != null ) {
-			userService.setActiveState(login, activeState);
-		}
+		ensureDbExistance(userService);
 		
 		if ( sessionToken != null ) {
 			LOG.warn( "sessionToken is not null [userInfo={}]" , this);
@@ -84,6 +91,7 @@ public abstract class UserInfo {
 		{
 			login = UserService.DEFAULT_ADMIN_LOGIN;
 			password = UserService.DEFAULT_ADMIN_PWD; 
+			email = "admin@"+EMAIL_DOMAIN;
 		}
 	};
 	
@@ -92,6 +100,7 @@ public abstract class UserInfo {
 			login = "test1";
 			password = "test1pwd"; 
 			rights = new String[] {"right1"};
+			email = "test1@"+EMAIL_DOMAIN;
 		}
 	};
 	

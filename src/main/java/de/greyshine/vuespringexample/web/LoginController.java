@@ -154,11 +154,22 @@ public class LoginController {
 		return login == null ? null : userService.getRights( login );
 	}
 
-	@GetMapping( value="status")
+	@GetMapping( value="status", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Status status(HttpServletRequest req) {
 		
 		return new Status( getLoggedInName(req) );
 	};
+	
+	@PostMapping( value="/ajax/passwordreset", produces = MediaType.APPLICATION_JSON_VALUE )
+	public Status passwordReset( @RequestParam(value="email") String email, HttpServletRequest request ) {
+		
+		// TODO: prevent too many tries from same address in a certain timeframe
+		
+		LOG.info( "passwordReset: {} by {}", email, Utils.getIp( request ) );
+		
+		loginService.requestPasswordRenewal( email );
+		return new Status( "ok" );
+	}
 	
 	/**
 	 * @param req
