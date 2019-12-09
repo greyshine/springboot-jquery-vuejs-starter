@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import de.greyshine.vuespringexample.UserInfo;
+import de.greyshine.vuespringexample.test.UserInfo;
 import de.greyshine.vuespringexample.services.UserService;
 import de.greyshine.vuespringexample.web.LoginController;
 

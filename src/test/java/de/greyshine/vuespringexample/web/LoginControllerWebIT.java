@@ -15,8 +15,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import de.greyshine.vuespringexample.UserInfo;
 import de.greyshine.vuespringexample.services.UserService;
+import de.greyshine.vuespringexample.test.UserInfo;
 
 
 @RunWith(SpringRunner.class)
