@@ -287,7 +287,7 @@ public class EmailService {
 		
 		final String html = Utils.trimToNull( emailEntity.getHtml() );
         // no text/content at all seems not allowed so we put an empty string
-		final String plaintext = html == null && Utils.isBlank( emailEntity.getPlaintext() ) ? "" : emailEntity.getPlaintext().strip();
+		final String plaintext = html == null && Utils.isBlank( emailEntity.getPlaintext() ) ? "" : Utils.trimToNull( emailEntity.getPlaintext() );
 		final List<EmailBinary> attachmentBinarys = emailEntity.getDatas( Type.ATTACHMENT );
 		
 		final boolean isMultipart = (html != null && plaintext != null) || !attachmentBinarys.isEmpty();

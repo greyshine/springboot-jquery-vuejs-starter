@@ -30,10 +30,13 @@ public class User {
 	private String login;
 
 	@Version
+	@Column( name="_version" )
 	private int version;
 
+	@Column( name="_created" )
 	private LocalDateTime created;
 	@SuppressWarnings("unused")
+	@Column( name="_updated" )
 	private LocalDateTime updated;
 	
 	@ElementCollection

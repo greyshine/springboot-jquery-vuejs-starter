@@ -1,4 +1,4 @@
-package de.greyshine.vuespringexample;
+package de.greyshine.vuespringexample.test;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.web.servlet.MockMvc;
 
+import de.greyshine.vuespringexample.TestUtils;
 import de.greyshine.vuespringexample.services.UserService;
 import de.greyshine.vuespringexample.utils.Utils;
 

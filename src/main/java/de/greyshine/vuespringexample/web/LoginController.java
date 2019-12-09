@@ -30,7 +30,7 @@ import de.greyshine.vuespringexample.utils.Utils;
 @RestController
 public class LoginController {
 	
-	private static final Logger LOG 	= LoggerFactory.getLogger( LoginController.class );
+	private static final Logger LOG = LoggerFactory.getLogger( LoginController.class );
 
 	@Autowired
 	private LoginService loginService;

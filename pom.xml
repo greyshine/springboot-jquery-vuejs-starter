@@ -95,5 +95,18 @@
 		</plugins>
 	
 	</build>
+	
+	<profiles>
+	    <!-- https://www.baeldung.com/maven-profiles -->
+		<profile>
+	       <id>development</id>
+		   <activation>
+			<property>
+			    <name>environment</name>
+			    <value>development</value>
+			</property>
+		    </activation>
+	   </profile>
+	</profiles>
 
 </project>

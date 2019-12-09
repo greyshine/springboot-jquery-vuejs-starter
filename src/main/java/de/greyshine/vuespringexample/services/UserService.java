@@ -60,7 +60,7 @@ public class UserService {
 		
 		User user = new User();
 		user.setLogin(login.strip());
-		user.setPassword(getPasswordCrypted(password));
+		user.setPassword( getPasswordCrypted(password) );
 		user.setActive(active);
 		user.setEmail(email.strip());
 		
@@ -91,7 +91,8 @@ public class UserService {
 			final MessageDigest digest = MessageDigest.getInstance("SHA-512");
 			digest.reset();
 			digest.update(password.getBytes("utf8"));
-			return String.format("%0128x", new BigInteger(1, digest.digest()));
+			final String encryptedPassword = String.format("%0128x", new BigInteger(1, digest.digest())); 
+			return encryptedPassword;
 
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);

@@ -1,5 +1,7 @@
 package de.greyshine.vuespringexample.services;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import de.greyshine.vuespringexample.db.entity.User;
 import de.greyshine.vuespringexample.db.repos.UserRepository;
+import de.greyshine.vuespringexample.email.EmailService;
 import de.greyshine.vuespringexample.utils.Utils;
 
 @Service
@@ -34,6 +37,9 @@ public class LoginService {
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private EmailService emailService;
 
 	@Transactional
 	public LoginState login(String login, String password) {
@@ -113,11 +119,12 @@ public class LoginService {
 		if (Utils.isBlank(email)) {
 			return false;
 		}
+		
+		email = email.strip();
 
-		String password = Long.toString(System.currentTimeMillis(), 30).toLowerCase();
-		password = UserService.getPasswordCrypted(password);
+		final String password = UUID.randomUUID().toString().toLowerCase().replace("-", "");
 
-		final Query q = em.createQuery(
+		Query q = em.createQuery(
 				"UPDATE User u " + 
 				"SET u.password = :password " + 
 				"WHERE u.email = :email " +
@@ -125,11 +132,28 @@ public class LoginService {
 		);
 
 		q.setParameter("adminLogin", "admin");
-		q.setParameter("email", Utils.strip(email));
-		q.setParameter("password", password);
+		q.setParameter("email", email);
+		q.setParameter("password", UserService.getPasswordCrypted(password));
 
 		final int resultCount = q.executeUpdate();
 		
-		return resultCount > 0;
+		if ( resultCount < 1 ) { 
+			LOG.warn( "Reseting password for email '{}' failed. No such account.", email );
+			return false;
+		}
+		
+		q = em.createQuery(
+				"SELECT u.login "+
+				"FROM User u " + 
+				"WHERE u.email = :email "
+		);
+		q.setParameter("email", email);
+		
+		final Map<String,String> emailVars = new HashMap<>(2);
+		emailVars.put( "user", String.valueOf( q.getResultList().get(0) ) );
+		emailVars.put( "password", password);
+		
+		emailService.send("new-password", EmailService.AddressTo.build( email ) , emailVars, null);
+		return true;
 	}
 }

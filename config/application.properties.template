@@ -19,8 +19,12 @@ spring.jpa.hibernate.ddl-auto=create
 
 
 ## email properties
-mail.sender.email=kuemmel.dss@gmx.de
+mail.sender.email=some@email.com
 mail.sender.name=MyApp
+
+mail.maxSendFailures=5
+mail.resendWaitSeconds=480
+mail.sendInterval=10000
 
 spring.mail.host=localhost
 spring.mail.port=587
