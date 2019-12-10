@@ -16,12 +16,23 @@ public class WebConfig implements WebMvcConfigurer {
 	 * @return spring setup {@link AccessInterceptor}
 	 */
 	@Bean
+	public MdcInterceptor mdcInterceptor() {
+		return new MdcInterceptor();
+	}
+	
+	/**
+	 * Sets up the interceptor with e.g. @Autowired components
+	 * 
+	 * @return spring setup {@link AccessInterceptor}
+	 */
+	@Bean
 	public AccessInterceptor accessInterceptor() {
 		return new AccessInterceptor();
 	}
 	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor( mdcInterceptor() );
 		registry.addInterceptor( accessInterceptor() );
 	}
 

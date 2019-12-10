@@ -220,7 +220,7 @@ public class EmailService {
 		).getResultList();
 		
 		if ( emails.isEmpty() ) {
-			LOG.info( "no new emails..." );
+			LOG.debug( "no new emails..." );
 			return;
 		}
 		
@@ -316,12 +316,12 @@ public class EmailService {
         try {
 			
         	for( EmailBinary eb : attachmentBinarys ) {
-        		LOG.info( "emailBinary: {}", eb );
+        		LOG.debug( "emailBinary: {}", eb );
         		messageHelper.addAttachment(eb.name, ()->new ByteArrayInputStream(eb.data), eb.contentType);	
         	}
         	
 		} catch (Exception e) {
-			LOG.info( "{}", Utils.toString( e ), e );
+			LOG.error( "{}", Utils.toString( e ), e );
 			emailEntity.setFailed( LocalDateTime.now() );
 			throw e instanceof MessagingException ? (MessagingException)e : new MessagingException( "Attachment handling failed: "+ e.getMessage() , e);
 		}
@@ -394,7 +394,7 @@ public class EmailService {
 			
 			templates.put( templateName, new EmailTexts(subject, html, plaintext) );
 			
-			LOG.info( "read {}\nsubject: {}\n\nhtml:\n\n{}\n\nplaintext:\n\n{}", resource, subject, html, plaintext );
+			LOG.debug( "read {}\nsubject: {}\n\nhtml:\n\n{}\n\nplaintext:\n\n{}", resource, subject, html, plaintext );
 			
 			
 		} catch (IOException e) {

@@ -10,10 +10,12 @@ import javax.persistence.Query;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import de.greyshine.vuespringexample.MdcConstants;
 import de.greyshine.vuespringexample.db.entity.User;
 import de.greyshine.vuespringexample.db.repos.UserRepository;
 import de.greyshine.vuespringexample.email.EmailService;
@@ -37,7 +39,7 @@ public class LoginService {
 
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private EmailService emailService;
 
@@ -66,6 +68,8 @@ public class LoginService {
 			user.increaseBadPasswordCount();
 			return LoginState.BAD_PASSWORD;
 		}
+
+		MDC.put(MdcConstants.USER, user.getLogin());
 
 		user.resetBadPasswordCount();
 
@@ -119,41 +123,33 @@ public class LoginService {
 		if (Utils.isBlank(email)) {
 			return false;
 		}
-		
+
 		email = email.strip();
 
 		final String password = UUID.randomUUID().toString().toLowerCase().replace("-", "");
 
-		Query q = em.createQuery(
-				"UPDATE User u " + 
-				"SET u.password = :password " + 
-				"WHERE u.email = :email " +
-				"AND u.login != :adminLogin "
-		);
+		Query q = em.createQuery("UPDATE User u " + "SET u.password = :password " + "WHERE u.email = :email "
+				+ "AND u.login != :adminLogin ");
 
 		q.setParameter("adminLogin", "admin");
 		q.setParameter("email", email);
 		q.setParameter("password", UserService.getPasswordCrypted(password));
 
 		final int resultCount = q.executeUpdate();
-		
-		if ( resultCount < 1 ) { 
-			LOG.warn( "Reseting password for email '{}' failed. No such account.", email );
+
+		if (resultCount < 1) {
+			LOG.warn("Reseting password for email '{}' failed. No such account.", email);
 			return false;
 		}
-		
-		q = em.createQuery(
-				"SELECT u.login "+
-				"FROM User u " + 
-				"WHERE u.email = :email "
-		);
+
+		q = em.createQuery("SELECT u.login " + "FROM User u " + "WHERE u.email = :email ");
 		q.setParameter("email", email);
-		
-		final Map<String,String> emailVars = new HashMap<>(2);
-		emailVars.put( "user", String.valueOf( q.getResultList().get(0) ) );
-		emailVars.put( "password", password);
-		
-		emailService.send("new-password", EmailService.AddressTo.build( email ) , emailVars, null);
+
+		final Map<String, String> emailVars = new HashMap<>(2);
+		emailVars.put("user", String.valueOf(q.getResultList().get(0)));
+		emailVars.put("password", password);
+
+		emailService.send("new-password", EmailService.AddressTo.build(email), emailVars, null);
 		return true;
 	}
 }

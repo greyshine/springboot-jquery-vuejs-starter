@@ -132,27 +132,32 @@ public class LoginController {
 	 * @return
 	 */
 	@Transactional
-	public Set<String> getSessionUserRights(HttpServletRequest req) {
+	public Set<String> getSessionUserRights(HttpServletRequest request) {
 		
-		final HttpSession httpSession = req.getSession(false);
+		final HttpSession httpSession = request.getSession(false);
 
 		String login = httpSession == null ? null : (String)httpSession.getAttribute( "login" );
 		
 		if ( Utils.isBlank( login ) ) {
 			
-			LOG.info( "token for user rights: {}", req.getHeader( HEADER_AUTHORISATION ) );
-			
-			final String token = Utils.executeSafe( () -> {
-
-				final String t = (String)req.getHeader( HEADER_AUTHORISATION );
-				return t.substring( t.strip().indexOf( ' ' ) ).trim();
-			} );
-			
-			login =  Utils.isBlank( token ) ? null : loginService.getLoginByToken( token );
+			login =  getLoginByToken(request);
 		}
 		
 		return login == null ? null : userService.getRights( login );
 	}
+
+	@Transactional
+	public String getLoginByToken(HttpServletRequest request) {
+		
+		final String token = Utils.executeSafe( () -> {
+			LOG.info( "token for user rights: {}", request.getHeader( HEADER_AUTHORISATION ) );
+			final String t = (String)request.getHeader( HEADER_AUTHORISATION );
+			return t.substring( t.strip().indexOf( ' ' ) ).trim();
+		} );
+		
+		return  Utils.isBlank( token ) ? null : loginService.getLoginByToken( token );
+	}
+	
 
 	@GetMapping( value="status", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Status status(HttpServletRequest req) {
