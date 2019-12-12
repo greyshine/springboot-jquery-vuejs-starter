@@ -24,16 +24,16 @@ import de.greyshine.vuespringexample.utils.Utils;
 public class UserService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
-	
+
 	public static final String DEFAULT_ADMIN_LOGIN = "admin";
 	/**
 	 * Change that after first start of app!
 	 */
 	public static final String DEFAULT_ADMIN_PWD = "adminpwd";
-	
+
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	/**
 	 * Ensures that an user with login "admin" exists; if created the user is
 	 * disabled by default.
@@ -48,35 +48,37 @@ public class UserService {
 		}
 
 		// TODO get email from application.properties or similar configuration
-		create(DEFAULT_ADMIN_LOGIN, DEFAULT_ADMIN_PWD, "test@greyshine.de", new String[]{Access.RIGHT_ADMIN}, false);
+		create(DEFAULT_ADMIN_LOGIN, DEFAULT_ADMIN_PWD, "test@greyshine.de", new String[] { Access.RIGHT_ADMIN }, false);
 	}
-	
+
 	@Transactional
 	public User create(String login, String password, String email, String[] rights, boolean active) {
 
 		Assert.hasText(login, "login is blank");
 		Assert.hasText(password, "password is blank");
 		Assert.hasText(email, "email is blank");
-		
+
 		User user = new User();
 		user.setLogin(login.strip());
-		user.setPassword( getPasswordCrypted(password) );
+		user.setPassword(getPasswordCrypted(password));
 		user.setActive(active);
 		user.setEmail(email.strip());
-		
-		for(String right : rights==null?new String[0]:rights) {
-			user.addRight( right );
+
+		for (String right : rights == null ? new String[0] : rights) {
+			user.addRight(right);
 		}
-		
+
 		user = userRepository.save(user);
 
 		LOG.debug("created: {}", user);
-		
+
 		return user;
 	}
-	
+
 	/**
-	 * TODO: do some crazy special letter handling so db stored value is not reverse enginerable.
+	 * TODO: do some crazy special letter handling so db stored value is not reverse
+	 * enginerable.
+	 * 
 	 * @param password
 	 * @return
 	 */
@@ -91,7 +93,7 @@ public class UserService {
 			final MessageDigest digest = MessageDigest.getInstance("SHA-512");
 			digest.reset();
 			digest.update(password.getBytes("utf8"));
-			final String encryptedPassword = String.format("%0128x", new BigInteger(1, digest.digest())); 
+			final String encryptedPassword = String.format("%0128x", new BigInteger(1, digest.digest()));
 			return encryptedPassword;
 
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
@@ -101,38 +103,43 @@ public class UserService {
 
 	@Transactional
 	public Set<String> getRights(String login) {
-		
-		if ( Utils.isBlank( login ) ) { return Collections.emptySet(); }
-		
-		final User user = userRepository.findByLogin( login );
-		return user == null ? Collections.emptySet() : new HashSet<>( user.getRights() );
+
+		if (Utils.isBlank(login)) {
+			return Collections.emptySet();
+		}
+
+		final User user = userRepository.findByLogin(login);
+		return user == null ? Collections.emptySet() : new HashSet<>(user.getRights());
 	}
 
 	@Transactional
 	public void cleanSessionToken(String login) {
-		
-		final User user = userRepository.findByLogin( login );
-		if ( user == null ) { return; }
-		
-		user.setSessionToken( null );
+
+		final User user = userRepository.findByLogin(login);
+		if (user == null) {
+			return;
+		}
+
+		user.setSessionToken(null);
 	}
 
 	@Transactional
 	public boolean setActiveState(String login, boolean activeState) {
-		
-		final User user = Utils.isBlank( login ) ? null : userRepository.findByLogin( login );
-		
-		if ( user == null ) { return false; }
-		
-		user.setActive( activeState );
-		
+
+		final User user = Utils.isBlank(login) ? null : userRepository.findByLogin(login);
+
+		if (user == null) {
+			return false;
+		}
+
+		user.setActive(activeState);
+
 		return true;
 	}
 
 	@Transactional
 	public boolean isLogin(String login) {
-		return userRepository.findByLogin( login ) != null;
+		return userRepository.findByLogin(login) != null;
 	}
-	
-	
+
 }

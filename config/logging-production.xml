@@ -15,19 +15,38 @@
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%logger{200}:%line] [%thread/%X{ip}/%X{user}] %msg%n</pattern>
         </encoder>
     </appender>
+    
+    <appender name="FILE_WEBREQUESTS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- http://logback.qos.ch/manual/appenders.html --> 
+        <file>logs/PROD-webrequests.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/webrequests/PROD-%d{yyyy-MM-dd}-webrequests.log.zip</fileNamePattern>
+            <!-- maxHistory>20</maxHistory -->
+            <!-- totalSizeCap>100MB</totalSizeCap -->
+        </rollingPolicy>
 
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <logger name="WEBREQUEST" level="INFO" additivity="false">
+        <appender-ref ref="FILE_WEBREQUESTS" />
+    </logger>
+    
     <logger name="com.zaxxer.hikari" level="WARN" />
     <logger name="org.hibernate" level="WARN" />
     <logger name="org.springframework" level="WARN" />
     <logger name="org.thymeleaf" level="WARN" />
     
     <logger name="de.greyshine" level="WARN" additivity="false">
-	    <appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="de.greyshine.vuespringexample.email.EmailService" level="INFO" additivity="false" />
-
-	<root level="DEBUG">
-	    <appender-ref ref="STDOUT" />
-	</root>
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="de.greyshine.vuespringexample.email.EmailService" level="WARN" additivity="false" />
+    <logger name="de.greyshine.vuespringexample.web.interceptor.RequestLogInterceptor" level="WARN" additivity="false" />
+    
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+    </root>
  
 </configuration>

@@ -5,13 +5,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,8 +38,7 @@ public final class Utils {
 	public static final String LOCALDATE_FORMAT = "yyyy-MM-dd";
 	public static final String LOCALDATETIME_FORMAT = LOCALDATE_FORMAT+"'T'HH:mm:ss.SSS";
 
-	private Utils() {
-	}
+	private Utils() {}
 
 	public static String toString(Object object) {
 		
@@ -220,6 +227,11 @@ public final class Utils {
 	}
 	
 	@FunctionalInterface
+	public interface Runnable2 {
+		void run() throws Exception;
+	}
+	
+	@FunctionalInterface
 	public interface Supplier2<T> {
 		T get() throws Exception;
 	}
@@ -231,7 +243,25 @@ public final class Utils {
 
 	public static String formatDate(String format, LocalDateTime localDateTime) {
 		if ( format == null || localDateTime == null ) { return null; }
+		
+		// TODO: optimize by using cached DateTimeFormatter 
 		return DateTimeFormatter.ofPattern( format ).format( localDateTime );
+	}
+	
+	public static LocalDateTime parseLocalDateTime(String format, String value) {
+		
+		if ( isBlank(value) || isBlank(format) ) { return null; }
+		
+		// TODO: optimize by using cached DateTimeFormatter
+		try {
+		
+			final DateTimeFormatter formatter = DateTimeFormatter.ofPattern( format );
+	        return LocalDateTime.parse(value, formatter);
+			
+		} catch (Exception e) {
+			LOG.warn( "{}", e );
+			return null;
+		}
 	}
 
 	public static boolean equals(String s1, String s2, boolean ignoreCasing) {
@@ -315,5 +345,122 @@ public final class Utils {
 			close( closable );
 		}
 	}
+
+	public static String stringToString(String s) {
+		return s == null ? "null" : "\""+ s.replace("\"", "\\\"") +"\"";
+	}
+
+	public static <T> Stream<T> stream(Enumeration<T> e) {
+		
+		// https://stackoverflow.com/a/33243700/845117
+	    return StreamSupport.stream(
+	    		
+	        new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
+	            
+	        	public boolean tryAdvance(Consumer<? super T> action) {
+	                if(e != null && e.hasMoreElements()) {
+	                    action.accept(e.nextElement());
+	                    return true;
+	                }
+	                return false;
+	            }
+	            public void forEachRemaining(Consumer<? super T> action) {
+	                while(e != null && e.hasMoreElements()) { action.accept(e.nextElement()); }
+	            }
+	    }, false);
+	}
+
+	public static Class<?> getClass(Object object) {
+		return object == null ? null : object.getClass();
+	}
+
+	public static Long parseLong(String string) {
+		try {
+			return isBlank(string) ? null : Long.parseLong( string.strip() );
+		} catch(Exception e) {
+			return null;
+		}
+	}
 	
+	public static class Timetrackings {
+		
+		private final Object SYNC = new Object();
+		
+		private BigDecimal sum = BigDecimal.ZERO;
+		private long count = 0;
+		
+		public void add(Double value) {
+			
+			if ( value == null ) { return; }
+			
+			synchronized ( SYNC ) {
+				sum = sum.add( BigDecimal.valueOf( value ) );
+				count++;
+			}
+		}
+		
+		public void add(Long value) {
+			
+			if ( value == null ) { return; }
+			
+			synchronized ( SYNC ) {
+				sum = sum.add( BigDecimal.valueOf( value ) );
+				count++;
+			}
+		}
+		
+		public void execute( Runnable2 runnable ) {
+			
+			if ( runnable == null ) { return; }
+			
+			final long starttime = System.currentTimeMillis();
+			
+			try {
+				
+				runnable.run();
+			
+			} catch(Exception e) {
+				throw toRuntimeException(e);
+			} finally {
+				add( System.currentTimeMillis()-starttime );
+			}
+		}
+		
+		public <T> T execute( Supplier2<T> supplier ) {
+			
+			if ( supplier == null ) { return null; }
+			
+			final long starttime = System.currentTimeMillis();
+			
+			try {
+				
+				return supplier.get();
+			
+			} catch(Exception e) {
+				throw toRuntimeException(e);
+			} finally {
+				add( System.currentTimeMillis()-starttime );
+			}
+		}
+		
+		public double getSum() {
+			return sum.doubleValue();
+		}
+		
+		public long getCount() {
+			return count;
+		}
+		
+		public double getAverage() {
+			return count == 0 ? 0.0 : sum.divide( BigDecimal.valueOf(count), 7, RoundingMode.HALF_UP).setScale( 6, RoundingMode.HALF_UP).doubleValue();
+		}
+		
+		@Override
+		public String toString() {
+			synchronized (SYNC) {
+				return Timetrackings.class.getSimpleName()+" [avg="+ getAverage() +", count="+ count +", sum="+ sum.toPlainString() +"]";	
+			}
+		}
+		
+	}
 }

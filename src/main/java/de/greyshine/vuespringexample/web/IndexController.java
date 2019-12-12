@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class IndexController {
 
+	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger( IndexController.class );
 	
 	@Autowired

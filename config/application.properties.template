@@ -9,12 +9,12 @@ spring.datasource.url=jdbc:postgresql://localhost:5400/postgres
 spring.datasource.username=postgres
 spring.datasource.password=mysecretpassword
 
-## drop n create table again, good for testing, comment this in production
-#spring.jpa.hibernate.ddl-auto=create
-spring.jpa.show-sql = true
+##JPA
+spring.jpa.show-sql = false
 
-## !!! Important, if not set entitys are not found by the application!
-## possible values: validate, update, create, create-drop
+# drop n create table again, good for testing, comment this in production
+# !!! Important, if not set entitys are not found by the application!
+# possible values: validate, update, create, create-drop
 spring.jpa.hibernate.ddl-auto=create
 
 
@@ -32,3 +32,6 @@ spring.mail.username=nomatter
 spring.mail.password=nomatter
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
+
+#weblog
+weblog.cache=0

@@ -1,4 +1,4 @@
-package de.greyshine.vuespringexample;
+package de.greyshine.vuespringexample.web.interceptor;
 
 import java.util.Set;
 

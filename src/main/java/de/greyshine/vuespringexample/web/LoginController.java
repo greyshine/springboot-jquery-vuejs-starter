@@ -150,7 +150,7 @@ public class LoginController {
 	public String getLoginByToken(HttpServletRequest request) {
 		
 		final String token = Utils.executeSafe( () -> {
-			LOG.info( "token for user rights: {}", request.getHeader( HEADER_AUTHORISATION ) );
+			LOG.debug( "token for user rights: {}", request.getHeader( HEADER_AUTHORISATION ) );
 			final String t = (String)request.getHeader( HEADER_AUTHORISATION );
 			return t.substring( t.strip().indexOf( ' ' ) ).trim();
 		} );
