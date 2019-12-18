@@ -9,8 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD}) 
 public @interface Access {
 	
-	String RIGHT_ADMIN = "admin";
-
 	/**
 	 * When no value is declared a User must be in scope (logged in or provide proper credentials) to execute.
 	 * 

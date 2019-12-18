@@ -2,8 +2,6 @@ package de.greyshine.vuespringexample;
 
 import java.util.concurrent.Executor;
 
-import javax.annotation.PreDestroy;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -16,7 +16,10 @@ import de.greyshine.vuespringexample.annotations.Access;
 import de.greyshine.vuespringexample.utils.Utils;
 import de.greyshine.vuespringexample.web.LoginController;
 
-
+/**
+ * Checks @Access annotations... 
+ *
+ */
 public class AccessInterceptor extends HandlerInterceptorAdapter {
 
 	private static final Logger LOG = LoggerFactory.getLogger( AccessInterceptor.class );

@@ -52,6 +52,11 @@ form div.formMessageError {
 	color: red;
 }
 
+div.formMessageError {
+    margin: 10px 0px 0px 10px;
+    color: red;
+}
+
 
 div#app div#heading {
 	background-color: silver;
@@ -72,5 +77,23 @@ div#app div.menuHeading {
 
 
 div#passwordReset {
+}
+
+
+div#vue-login.conditionAgreements {}
+
+div#vue-login.conditionAgreements textarea {
 	
+	width: 90%;
+	height: 150px;
+	resize: vertical; 
+}
+
+div#vue-login.conditionAgreements p.cancelled {
+	display: none;
+	color: red;
+}
+
+div#vue-login.conditionAgreements div.date {
+	font-size: 0.5em;
 }

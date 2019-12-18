@@ -3,6 +3,7 @@ package de.greyshine.vuespringexample.web;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.greyshine.vuespringexample.annotations.Access;
 import de.greyshine.vuespringexample.db.entity.User;
+import de.greyshine.vuespringexample.services.ContractAgreementService;
 import de.greyshine.vuespringexample.services.LoginService;
 import de.greyshine.vuespringexample.services.LoginService.LoginState;
 import de.greyshine.vuespringexample.services.UserService;
@@ -37,6 +40,9 @@ public class LoginController {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private ContractAgreementService contractAgreementService;
 	
 	public static final String HEADER_WWWAUTHENTICATE = "WWW-Authenticate";
 	public static final String HEADER_AUTHORISATION= "Authorisation";
@@ -79,9 +85,48 @@ public class LoginController {
 			
 		} else {
 			
-			 final HttpSession httpSession = initNewHttpSession( login, req );
-			 return new Status( httpSession == null ? null : login );
+			final HttpSession httpSession = initNewHttpSession( login, req );
+			
+			final List<Long> caIds = httpSession == null ? null : contractAgreementService.getNeededConfirmationIds( login );
+			return new Status( httpSession == null ? null : login ).caIds( caIds );
 		}
+	}
+	
+	@PostMapping( value="/ajax/conditionAgreements", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Status conditionAgreements(HttpServletRequest request) {
+		
+		final HttpSession httpSession = request.getSession( false );
+		if ( httpSession == null || httpSession.isNew() ) { return new Status(null); }
+		
+		final String userLogin = (String) httpSession.getAttribute( "login" ); 
+		
+		final boolean isAgreed = "ok".equals( request.getParameter( "value" ) );
+
+		if ( !isAgreed ) {
+			
+			Utils.executeSafe( ()->httpSession.invalidate() );
+			return new Status( null ).alert( "No agreement on conditions did lock you out." );
+		
+		} else {
+			
+			final int count = contractAgreementService.setConfirmations(userLogin);
+			return new Status( count < 1 ? null : userLogin );
+		}
+	}
+	
+	@PostMapping( value="/ajax/conditionAgreementsOk", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Access
+	public Status conditionAgreementsOk(HttpServletRequest request) {
+		
+		final HttpSession httpSession = request.getSession( false );
+		
+		if ( httpSession == null || httpSession.isNew() ) { throw new IllegalStateException("User must have been logged in."); }
+		
+		final String userLogin = (String) httpSession.getAttribute( "login" ); 
+		
+		final int count = contractAgreementService.setConfirmations(userLogin);
+		
+		return new Status( count < 1 ? null : userLogin );
 	}
 	
 	@GetMapping( value="/rest/logout", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -160,9 +205,8 @@ public class LoginController {
 	
 
 	@GetMapping( value="status", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Status status(HttpServletRequest req) {
-		
-		return new Status( getLoggedInName(req) );
+	public Status status(HttpServletRequest request) {
+		return new Status( getLoggedInName(request) );
 	};
 	
 	@PostMapping( value="/ajax/passwordreset", produces = MediaType.APPLICATION_JSON_VALUE )
@@ -177,14 +221,14 @@ public class LoginController {
 	}
 	
 	/**
-	 * @param req
+	 * @param request
 	 * @return currently logged-in user
 	 */
-	public String getLoggedInName(HttpServletRequest req) {
+	public String getLoggedInName(HttpServletRequest request) {
 		
-		if ( req == null ) { return null; }
+		if ( request == null ) { return null; }
 		
-		final HttpSession httpSession = req.getSession( false );
+		final HttpSession httpSession = request.getSession( false );
 		
 		String login = null;
 		
@@ -205,8 +249,27 @@ public class LoginController {
 	
 	public static class Status {
 		
-		public String login; 
+		public String login;
+		public String alert;
+		public List<Long> caIds = new ArrayList<Long>(0);
+		
 		Status(String login) { this.login = login; }
+		
+		Status alert(String alert) {
+			
+			if ( Utils.isNotBlank(alert) ) {
+				this.alert = alert;
+			}
+			
+			return this;
+		}
+
+		private Status caIds(List<Long> caIds) {
+			if ( caIds == null ) { return this; }
+			this.caIds.addAll( caIds );
+			return this;
+		}
+		
 	}
 	
 	public static class Data {

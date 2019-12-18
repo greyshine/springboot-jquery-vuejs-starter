@@ -78,6 +78,13 @@
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-test</artifactId>
 		    <scope>test</scope>
+		    <exclusions>
+                <!-- https://stackoverflow.com/a/52980523/845117 -->
+                <exclusion>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		
 		<!-- DEVELOPMENT -->

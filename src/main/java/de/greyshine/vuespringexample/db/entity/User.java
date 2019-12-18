@@ -26,6 +26,8 @@ import de.greyshine.vuespringexample.utils.Utils;
 @Table(name = "\"user\"")
 public class User {
 
+	public static final String RIGHT_ADMIN = "admin";
+
 	@Id
 	private String login;
 
@@ -201,7 +203,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return User.class.getSimpleName() + " [login=" + login + ", created="+ Utils.toString( created ) +"]";
+		return User.class.getSimpleName() + " [login=" + login + ", created="+ Utils.toString( created ) +", rights="+ rights +"]";
 	}
 	
 }

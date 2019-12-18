@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import de.greyshine.vuespringexample.annotations.Access;
 import de.greyshine.vuespringexample.db.entity.User;
 import de.greyshine.vuespringexample.db.repos.UserRepository;
 import de.greyshine.vuespringexample.utils.Utils;
@@ -48,7 +47,7 @@ public class UserService {
 		}
 
 		// TODO get email from application.properties or similar configuration
-		create(DEFAULT_ADMIN_LOGIN, DEFAULT_ADMIN_PWD, "test@greyshine.de", new String[] { Access.RIGHT_ADMIN }, false);
+		create(DEFAULT_ADMIN_LOGIN, DEFAULT_ADMIN_PWD, "test@greyshine.de", new String[] { User.RIGHT_ADMIN }, false);
 	}
 
 	@Transactional

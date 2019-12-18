@@ -14,6 +14,45 @@ _initFunctions.push( function() {
 		
 		methods: {
 			
+			submitConditionAgreements(event) {
+				
+				console.log( event );
+				event.preventDefault();
+				
+				var formData = new FormData();
+				formData.set('value', event.target.name);
+				
+				axios('/ajax/conditionAgreements', {
+					  method: 'post',
+					  data: formData,
+				      }
+				).then( 
+						response => {
+							
+							console.log('response', response);
+							
+							if ( response.data.alert != null ) {
+								alert( response.data.alert );
+							}
+							
+							// reload page, with logged in sessionId / user
+				  			// https://stackoverflow.com/a/3715053/845117,
+							// https://developer.mozilla.org/en-US/docs/Web/API/Location/reload
+				  			location.reload(true);
+							
+						}, 
+						error => {
+							this.msgErrorLogin = error;
+						}
+						
+				).catch(error => {
+				  		
+					console.error(error);
+				  	this.msgErrorLogin = 'Fatal error: '+error;
+				})
+				.finally( () => {} );
+			},
+			
 			submitLogin(event) {
 				
 				console.log( 'event', event );
@@ -26,16 +65,18 @@ _initFunctions.push( function() {
 				axios('/ajax/login', {
 					  method: 'post',
 					  data: formData,
-					  //config: { headers: {'Content-Type':'multipart/form-data' } }
+					  // config: { headers:
+						// {'Content-Type':'multipart/form-data' } }
 				      })
 			  	.then( response => { 
 			  		
 			  		console.log('response', response);
-			  		   
+			  		
 			  		if ( response.data.login != null ) {
 			  			
 			  			// reload page, with logged in sessionId / user
-			  			// https://stackoverflow.com/a/3715053/845117, https://developer.mozilla.org/en-US/docs/Web/API/Location/reload 
+			  			// https://stackoverflow.com/a/3715053/845117,
+						// https://developer.mozilla.org/en-US/docs/Web/API/Location/reload
 			  			location.reload(true);
 			  			
 			  		} else {

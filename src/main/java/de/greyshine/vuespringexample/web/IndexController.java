@@ -1,5 +1,7 @@
 package de.greyshine.vuespringexample.web;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -10,6 +12,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import de.greyshine.vuespringexample.db.entity.ConditionsAgreement;
+import de.greyshine.vuespringexample.services.ContractAgreementService;
+import de.greyshine.vuespringexample.utils.Utils;
+
 @Controller
 public class IndexController {
 
@@ -19,6 +25,9 @@ public class IndexController {
 	@Autowired
 	private LoginController loginController;
 	
+	@Autowired
+	private ContractAgreementService contractAgreementService;
+	
 	@GetMapping(value="/plain", produces = MediaType.TEXT_PLAIN_VALUE)
 	@ResponseBody
 	public String indexPlain() {
@@ -26,8 +35,16 @@ public class IndexController {
 	}
 	
 	@GetMapping(value="/", produces = MediaType.TEXT_HTML_VALUE)
-	public String index(HttpServletRequest req) {
-		return loginController.getLoggedInName(req) == null ? "index.login" : "index";
+	public String index(HttpServletRequest request) {
+		
+		final String login = loginController.getLoggedInName(request);
+		if ( Utils.isBlank( login ) ) { return "index.login"; }
+		
+		final List<ConditionsAgreement> conditionsAgreements = contractAgreementService.getNeededConfirmations(login);
+		request.setAttribute( "login", login );
+		request.setAttribute( "conditionAgreements", conditionsAgreements );
+
+		return !conditionsAgreements.isEmpty() ? "index.conditionAgreements" : "index";
 	}
 
 }

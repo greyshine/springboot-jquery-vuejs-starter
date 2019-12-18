@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Spliterator;
@@ -44,6 +45,20 @@ public final class Utils {
 		
 		if ( object == null ) {
 			return "null";
+		}
+		
+		else if ( object.getClass().isArray() ) {
+
+			final Object[] items = (Object[])object;
+			final StringBuffer sb = new StringBuffer();
+			sb.append( items.length );
+			sb.append( ":[" );
+			for( int i=0; i<items.length; i++ ) {
+				sb.append( toString( items[i] ) );
+				if ( i < items.length-1 ) { sb.append(", "); }
+			}
+			sb.append( ']' );
+			return sb.toString();
 		}
 		
 		else if ( object instanceof LocalDate ) {
@@ -185,6 +200,17 @@ public final class Utils {
 		
 	}
 
+	public static void executeSafe( Runnable2 runnable ) {
+		
+		if ( runnable == null ) { return; }
+		
+		try {
+			runnable.run();
+		} catch (Exception e) {
+			LOG.debug( "{}", toString(e), e );
+		}
+	}
+	
 	/**
 	 * Securely executes a function / supplier. If an {@link Exception} occurs and a proper exception {@link Function} is provided it is invoked for returning a value.<br/>
 	 * 
@@ -241,6 +267,18 @@ public final class Utils {
 		T apply( S argument ) throws Exception;
 	}
 
+	public static String formatDate(LocalDate localDate) {
+		return formatDate( LOCALDATE_FORMAT, localDate );
+	}
+	
+	public static String formatDate(LocalDateTime localDateTime) {
+		return formatDate( LOCALDATETIME_FORMAT, localDateTime );
+	}
+	
+	public static String formatDate(String format, LocalDate localDate) {
+		return localDate == null ? null : formatDate( format, localDate.atStartOfDay() );
+	}
+	
 	public static String formatDate(String format, LocalDateTime localDateTime) {
 		if ( format == null || localDateTime == null ) { return null; }
 		
@@ -263,6 +301,10 @@ public final class Utils {
 			return null;
 		}
 	}
+	
+	public static boolean equals(Object o1, Object o2) {
+		return o1 == null || o2 == null ? false : o1==o2 ? true : o1.equals(o2);
+	}
 
 	public static boolean equals(String s1, String s2, boolean ignoreCasing) {
 		if ( s1 == null || s2 == null ) { return false; }
@@ -270,11 +312,6 @@ public final class Utils {
 		return !ignoreCasing ? s1.equals( s2 ) : s1.equalsIgnoreCase(s2);
 	}
 	
-	public static boolean equals(Long l1, Long l2) {
-		if ( l1 == null || l2 == null ) { return false; }
-		return l1 == l2;
-	}
-
 	public static String getResource(String name, Charset charset) throws IOException {
 		
 		charset = charset != null ? charset : CHARSET_UTF8;
@@ -463,4 +500,67 @@ public final class Utils {
 		}
 		
 	}
+
+	public static boolean isEmpty(Collection<?> collection) {
+		if ( collection == null || collection.size() < 1 ) { return true; }
+		for( Object o : collection ) {
+			if ( o != null ) { return false; }
+		}
+		return true;
+	}
+	
+	public static boolean isNotEmpty(Collection<?> collection) {
+		return !isEmpty( collection );
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> boolean containsOneOf(Collection<T> collection, T... items ) {
+		
+		if ( collection == null || items == null ) { return false; }
+		
+		for( T collectionItem : collection ) {
+			for( T checkItem : items ) {
+				if ( equals(collectionItem, checkItem) ) { return true; }	
+			}
+		}
+		
+		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> boolean isOneOf(T value, T... items) {
+		
+		if ( value == null || items == null ) { return false; }
+		
+		for ( T item : items ) {
+			if ( equals( value, item ) ) { return true; }
+		}
+		
+		return false;
+	}
+	
+	public static Wrapper<Integer> intWrapper() { return intWrapper(0); }
+	public static Wrapper<Integer> intWrapper(int value) { return new Wrapper<Integer>(value); }
+	public static Wrapper<Boolean> booleanWrapper(boolean value) { return new Wrapper<Boolean>(value); }
+	
+	public static class Wrapper<T> {
+		public T value;
+		public Wrapper() { this.value = null; }
+		public Wrapper(T value) { this.value = value; }
+		public boolean isNull() { return value == null; }
+		public boolean isNotNull() { return value != null; }
+	}
+
+	public static boolean isAllNotNull(Collection<?> collection, boolean allowEmptyCollection) {
+		
+		if ( !allowEmptyCollection && (collection == null || collection.isEmpty()) ) { return false; }
+		else if ( allowEmptyCollection && (collection == null || collection.isEmpty()) ) { return true; }
+		
+		for(Object item : collection) {
+			if ( item == null ) { return false; }
+		}
+		
+		return true;
+	}
+	
 }
